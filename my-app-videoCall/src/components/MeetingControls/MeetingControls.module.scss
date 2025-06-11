@@ -25,6 +25,22 @@
   &:active {
     transform: scale(0.95);
   }
+  
+  &.active {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+
+    &:hover {
+      background: linear-gradient(135deg, #45a049, #3d8b40);
+    }
+  }
+  
+  &.inactive {
+    background: linear-gradient(135deg, #f44336, #d32f2f);
+
+    &:hover {
+      background: linear-gradient(135deg, #d32f2f, #b71c1c);
+    }
+  }
 }
 
 .videoButton {

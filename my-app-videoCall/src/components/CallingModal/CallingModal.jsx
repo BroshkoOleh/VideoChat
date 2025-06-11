@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef } from 'react';
 import { MeetingProvider, MeetingConsumer } from '@videosdk.live/react-sdk';
 import { authToken } from '../../utils/videoSdkHelpers/API';
 import MeetingView from '../MeetingView/MeetingView';
 import styles from './CallingModal.module.scss';
 
-const CallingModal = ({ 
+const CallingModal = forwardRef(({ 
   isOpen, 
   onMeetingLeave, 
   userName = "User", 
@@ -13,7 +13,7 @@ const CallingModal = ({
   callState = 'calling',
   currentUser,
   onAcceptCall
-}) => {
+}, ref) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Auto-expand when in call
@@ -71,6 +71,7 @@ const CallingModal = ({
           <MeetingConsumer>
             {() => (
               <MeetingView 
+                ref={ref}
                 onMeetingLeave={onMeetingLeave}
                 userName={userName}
                 isAudioCall={isAudioCall}
@@ -83,6 +84,8 @@ const CallingModal = ({
       </div>
     </div>
   );
-};
+});
+
+CallingModal.displayName = 'CallingModal';
 
 export default CallingModal;

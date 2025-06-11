@@ -3,7 +3,15 @@ import { useMeeting } from '@videosdk.live/react-sdk';
 import styles from './MeetingControls.module.scss';
 
 const MeetingControls = ({ onMeetingLeave, isAudioCall }) => {
-  const { leave, toggleMic, toggleWebcam, micOn } = useMeeting();
+  const { leave, toggleMic, toggleWebcam, micOn, webcamOn } = useMeeting();
+
+  const handleToggleMic = () => {
+    toggleMic();
+  };
+
+  const handleToggleWebcam = () => {
+    toggleWebcam();
+  };
 
   const handleEndCall = () => {
     leave();
@@ -13,8 +21,8 @@ const MeetingControls = ({ onMeetingLeave, isAudioCall }) => {
   return (
     <div className={styles.controls}>
       <button 
-        className={`${styles.controlButton} ${styles.videoButton}`}
-        onClick={toggleWebcam}
+        className={`${styles.controlButton} ${styles.videoButton} ${webcamOn ? styles.active : styles.inactive}`}
+        onClick={handleToggleWebcam}
         disabled={isAudioCall}
         style={{ opacity: isAudioCall ? 0.5 : 1 }}
       >
@@ -25,9 +33,8 @@ const MeetingControls = ({ onMeetingLeave, isAudioCall }) => {
       </button>
 
       <button 
-        className={`${styles.controlButton} ${styles.micButton}`}
-        onClick={toggleMic}
-        style={{ opacity: micOn ? 1 : 0.5 }}
+        className={`${styles.controlButton} ${styles.micButton} ${micOn ? styles.active : styles.inactive}`}
+        onClick={handleToggleMic}
       >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
           <path d="M12 1C10.3431 1 9 2.34315 9 4V12C9 13.6569 10.3431 15 12 15C13.6569 15 15 13.6569 15 12V4C15 2.34315 13.6569 1 12 1Z" fill="currentColor"/>

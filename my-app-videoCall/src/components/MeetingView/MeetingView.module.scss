@@ -198,6 +198,24 @@
     transform: translateY(-2px);
   }
   
+  &.active {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    border-color: transparent;
+    
+    &:hover {
+      background: linear-gradient(135deg, #16a34a, #15803d);
+    }
+  }
+  
+  &.inactive {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    border-color: transparent;
+    
+    &:hover {
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+    }
+  }
+  
   &.leave {
     background: linear-gradient(135deg, #ef4444, #dc2626);
     border-color: transparent;

@@ -118,21 +118,62 @@ io.on('connection', (socket) => {
 
   // End call
   socket.on('end-call', (callData) => {
-    console.log('Call ended:', callData);
+    console.log('📞 Call ended:', callData);
+    console.log('🔍 Socket ID:', socket.id);
     
     const { meetingId, to, from } = callData;
     
+    // Get call info before deletion
+    const call = activeCalls.get(meetingId);
+    console.log('🔍 Active call before deletion:', call);
+    console.log('🔍 Active calls count before:', activeCalls.size);
+    
     // Remove active call
     activeCalls.delete(meetingId);
+    console.log('🔍 Active calls count after deletion:', activeCalls.size);
     
-    // Notify other participant
+    // Notify other participant(s)
     if (to) {
+      console.log('📤 Sending call-ended to:', to);
       socket.to(to).emit('call-ended', {
         meetingId,
         from,
         timestamp: Date.now()
       });
     }
+    
+    // Also notify the caller (from) to ensure both participants get the event
+    // This is important for proper media stream cleanup
+    if (from && from.key) {
+      console.log('📤 Sending call-ended to caller:', from.key);
+      socket.to(from.key).emit('call-ended', {
+        meetingId,
+        from,
+        timestamp: Date.now()
+      });
+    }
+    
+    // If we have call info, notify all participants in the call
+    if (call) {
+      console.log('📤 Broadcasting call-ended to all participants');
+      // Broadcast to all participants to ensure cleanup
+      io.to(call.from.key).emit('call-ended', {
+        meetingId,
+        from,
+        timestamp: Date.now()
+      });
+      
+      if (call.to && call.to !== call.from.key) {
+        console.log('📤 Broadcasting call-ended to recipient:', call.to);
+        io.to(call.to).emit('call-ended', {
+          meetingId,
+          from,
+          timestamp: Date.now()
+        });
+      }
+    }
+    
+    console.log('✅ End call processing complete');
   });
 
   // Cancel call (before it's answered)

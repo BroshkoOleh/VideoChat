@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CallingModal from '../CallingModal/CallingModal';
 import { createMeeting } from '../../utils/videoSdkHelpers/API';
@@ -17,6 +17,51 @@ const Home = () => {
   const [meetingId, setMeetingId] = useState('');
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [isSocketConnected, setIsSocketConnected] = useState(false);
+  
+  // Ref для виклику leave() з MeetingView
+  const meetingViewRef = useRef(null);
+
+  // Universal handler з актуальним callState
+  const handleMeetingLeave = useCallback(() => {
+    console.log('🔄 handleMeetingLeave called with callState:', callState);
+    
+    if (!currentCall) {
+      console.warn('❌ No current call to handle');
+      return;
+    }
+
+    // Викликаємо leave() локально через ref перед будь-якими socket операціями
+    if (meetingViewRef.current && meetingViewRef.current.triggerLeave) {
+      console.log('✅ Calling triggerLeave from handleMeetingLeave');
+      meetingViewRef.current.triggerLeave();
+    }
+
+    if (callState === 'calling') {
+      console.log('🚫 Cancelling call');
+      socketService.cancelCall({
+        meetingId: currentCall.meetingId,
+        to: currentCall.to
+      });
+    } else if (callState === 'receiving') {
+      console.log('🚫 Rejecting call');
+      socketService.rejectCall({
+        meetingId: currentCall.meetingId,
+        from: currentCall.from
+      });
+    } else if (callState === 'in-call') {
+      console.log('🔚 Ending call');
+      socketService.endCall({
+        meetingId: currentCall.meetingId,
+        to: currentCall.to,
+        from: currentUser
+      });
+    }
+
+    // Очищуємо локальний стан
+    setCallState('idle');
+    setCurrentCall(null);
+    setMeetingId('');
+  }, [callState, currentCall, currentUser]);
 
   // Authentication check
   useEffect(() => {
@@ -95,7 +140,16 @@ const Home = () => {
     });
 
     socketService.on('call-cancelled', (data) => {
-      console.log('❌ Call cancelled:', data);
+      console.log('🚫 Call cancelled:', data);
+      
+      // Додаємо виклик leave() і для cancel події як запасний варіант
+      if (meetingViewRef.current && meetingViewRef.current.triggerLeave) {
+        console.log('✅ Calling triggerLeave from call-cancelled event');
+        meetingViewRef.current.triggerLeave();
+      } else {
+        console.warn('❌ Cannot call triggerLeave from call-cancelled - ref not available');
+      }
+      
       setCallState('idle');
       setCurrentCall(null);
       setMeetingId('');
@@ -103,6 +157,17 @@ const Home = () => {
 
     socketService.on('call-ended', (data) => {
       console.log('📞 Call ended:', data);
+      console.log('🔍 meetingViewRef.current:', meetingViewRef.current);
+      console.log('🔍 meetingViewRef.current?.triggerLeave:', meetingViewRef.current?.triggerLeave);
+      
+      // Важливо: викликаємо leave() для очищення медіапотоків
+      if (meetingViewRef.current && meetingViewRef.current.triggerLeave) {
+        console.log('✅ Calling triggerLeave from socket event');
+        meetingViewRef.current.triggerLeave();
+      } else {
+        console.warn('❌ Cannot call triggerLeave - ref not available');
+      }
+      
       setCallState('idle');
       setCurrentCall(null);
       setMeetingId('');
@@ -166,47 +231,7 @@ const Home = () => {
     }
   };
 
-// handleAcceptCall видалено - тепер обробляється всередині MeetingView компонента
 
-  const handleRejectCall = () => {
-    if (!currentCall) return;
-
-    socketService.rejectCall({
-      meetingId: currentCall.meetingId,
-      from: currentCall.from
-    });
-
-    setCallState('idle');
-    setCurrentCall(null);
-    setMeetingId('');
-  };
-
-  const handleCancelCall = () => {
-    if (!currentCall) return;
-
-    socketService.cancelCall({
-      meetingId: currentCall.meetingId,
-      to: currentCall.to
-    });
-
-    setCallState('idle');
-    setCurrentCall(null);
-    setMeetingId('');
-  };
-
-  const handleEndCall = () => {
-    if (!currentCall) return;
-
-    socketService.endCall({
-      meetingId: currentCall.meetingId,
-      to: currentCall.to,
-      from: currentUser
-    });
-
-    setCallState('idle');
-    setCurrentCall(null);
-    setMeetingId('');
-  };
 
   if (!currentUser) {
     return <div className={styles.loading}>Завантаження...</div>;
@@ -293,8 +318,9 @@ const Home = () => {
 
         {/* Calling Modal */}
         <CallingModal
+          ref={meetingViewRef}
           isOpen={callState !== 'idle'}
-          onMeetingLeave={callState === 'calling' ? handleCancelCall : callState === 'receiving' ? handleRejectCall : handleEndCall}
+          onMeetingLeave={handleMeetingLeave}
           userName={callState === 'calling' ? availableUsers.find(u => u.key === selectedUser)?.name : currentCall?.from?.name || 'Невідомий'}
           isAudioCall={currentCall?.type === 'audio'}
           meetingId={meetingId}

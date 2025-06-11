@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useMeeting } from '@videosdk.live/react-sdk';
 import ParticipantView from '../ParticipantView/ParticipantView';
 import styles from './MeetingView.module.scss';
 
-const MeetingView = ({ 
+const MeetingView = forwardRef(({ 
   onMeetingLeave, 
   userName, 
   isAudioCall, 
   callState, 
   onAcceptCall 
-}) => {
+}, ref) => {
   const [joined, setJoined] = useState(null);
   
-  const { join, leave, toggleMic, toggleWebcam, participants } = useMeeting({
+  const { join, leave, toggleMic, toggleWebcam, participants, micOn, webcamOn } = useMeeting({
     onMeetingJoined: () => {
       console.log('✅ Meeting joined successfully');
       setJoined("JOINED");
@@ -26,6 +26,20 @@ const MeetingView = ({
     }
   });
 
+  useImperativeHandle(ref, () => ({
+    triggerLeave: () => {
+      console.log('🔄 Triggered leave from socket event');
+      console.log('🔍 Current joined state:', joined);
+      console.log('🔍 Leave function available:', typeof leave);
+      if (joined === "JOINED") {
+        console.log('✅ Calling leave() from triggerLeave');
+        leave();
+      } else {
+        console.warn('❌ Cannot call leave() - not joined or joined state:', joined);
+      }
+    }
+  }), [leave, joined]);
+
   // Auto-join when call state becomes 'in-call'
   useEffect(() => {
     if (callState === 'in-call' && joined === null) {
@@ -35,12 +49,40 @@ const MeetingView = ({
     }
   }, [callState, joined, join]);
 
+  // Cleanup тільки при розмонтуванні компонента, не під час активного дзвінка
+  useEffect(() => {
+    return () => {
+      console.log('🧹 Component unmounting, cleaning up');
+      setJoined(null);
+    };
+  }, []);
+
+  // Debug: log joined state changes
+  useEffect(() => {
+    console.log('🔍 MeetingView joined state changed:', joined);
+  }, [joined]);
+
   const handleAccept = () => {
     onAcceptCall();
   };
 
   const handleReject = () => {
     onMeetingLeave();
+  };
+
+  // Виправлено: toggleMic без передачі event об'єкта
+  const handleToggleMic = () => {
+    toggleMic();
+  };
+
+  // Виправлено: toggleWebcam без передачі event об'єкта  
+  const handleToggleWebcam = () => {
+    toggleWebcam();
+  };
+
+  // Виправлено: leave з правильним очищенням
+  const handleLeave = () => {
+    leave();
   };
 
   if (callState === 'receiving') {
@@ -88,7 +130,9 @@ const MeetingView = ({
           <p className={styles.callStatus}>Дзвонимо...</p>
           <button 
             className={`${styles.actionBtn} ${styles.cancel}`}
-            onClick={onMeetingLeave}
+            onClick={() => {
+              onMeetingLeave();
+            }}
           >
             📞 Скасувати
           </button>
@@ -121,22 +165,22 @@ const MeetingView = ({
             
             <div className={styles.meetingControls}>
               <button 
-                className={`${styles.controlBtn} ${styles.mic}`}
-                onClick={toggleMic}
+                className={`${styles.controlBtn} ${styles.mic} ${micOn ? styles.active : styles.inactive}`}
+                onClick={handleToggleMic}
               >
-                🎤 Мікрофон
+                {micOn ? '🎤' : '🚫🎤'} Мікрофон
               </button>
               {!isAudioCall && (
                 <button 
-                  className={`${styles.controlBtn} ${styles.camera}`}
-                  onClick={toggleWebcam}
+                  className={`${styles.controlBtn} ${styles.camera} ${webcamOn ? styles.active : styles.inactive}`}
+                  onClick={handleToggleWebcam}
                 >
-                  📹 Камера
+                  {webcamOn ? '📹' : '🚫📹'} Камера
                 </button>
               )}
               <button 
                 className={`${styles.controlBtn} ${styles.leave}`}
-                onClick={leave}
+                onClick={handleLeave}
               >
                 📞 Завершити
               </button>
@@ -152,6 +196,8 @@ const MeetingView = ({
   }
 
   return null;
-};
+});
 
-export default MeetingView; 
+MeetingView.displayName = 'MeetingView';
+
+export default MeetingView;
