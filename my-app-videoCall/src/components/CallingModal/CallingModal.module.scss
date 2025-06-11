@@ -1,0 +1,101 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  padding: 30px;
+  width: 320px;
+  max-width: 90vw;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  &.expanded {
+    width: 640px;
+    height: 480px;
+    max-width: 95vw;
+    max-height: 95vh;
+  }
+}
+
+.topControls {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.expandButton {
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: rgba(0, 0, 0, 0.8);
+  cursor: pointer;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+  &:hover {
+    background: rgba(255, 255, 255, 1);
+    color: rgba(0, 0, 0, 1);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+// Стилі для userInfo, avatar, controls, buttons тепер знаходяться в:
+// - MeetingView/MeetingView.module.scss 
+// - MeetingControls/MeetingControls.module.scss
+
+// Responsive design
+@media (max-width: 768px) {
+  .modal {
+    width: 280px;
+    padding: 20px;
+
+    &.expanded {
+      width: 95vw;
+      height: 70vh;
+    }
+  }
+
+  .topControls {
+    top: 10px;
+    right: 10px;
+  }
+
+  .expandButton {
+    width: 30px;
+    height: 30px;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+}

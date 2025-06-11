@@ -1,0 +1,73 @@
+.controls {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.controlButton {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: white;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.videoButton {
+  background: linear-gradient(135deg, #2196F3, #1976D2);
+
+  &:hover {
+    background: linear-gradient(135deg, #1976D2, #1565C0);
+  }
+
+  &:disabled {
+    background: #666;
+    cursor: not-allowed;
+    
+    &:hover {
+      transform: none;
+    }
+  }
+}
+
+.micButton {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+
+  &:hover {
+    background: linear-gradient(135deg, #45a049, #3d8b40);
+  }
+}
+
+.endButton {
+  background: linear-gradient(135deg, #f44336, #d32f2f);
+
+  &:hover {
+    background: linear-gradient(135deg, #d32f2f, #b71c1c);
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .controls {
+    gap: 10px;
+  }
+
+  .controlButton {
+    width: 45px;
+    height: 45px;
+  }
+} 
