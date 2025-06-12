@@ -63,7 +63,7 @@ const CallingModal = forwardRef(({
           config={{
             meetingId,
             micEnabled: true,
-            webcamEnabled: !isAudioCall,
+            webcamEnabled: false,
             name: currentUser?.name || "User",
           }}
           token={authToken}

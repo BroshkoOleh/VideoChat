@@ -1,20 +1,28 @@
 import React, { useRef, useMemo, useEffect } from 'react';
 import { useParticipant } from '@videosdk.live/react-sdk';
-import ReactPlayer from 'react-player';
 import styles from './ParticipantView.module.scss';
 
-const ParticipantView = ({ participantId, isAudioCall }) => {
+const ParticipantView = ({ participantId }) => {
   const micRef = useRef(null);
+  const videoRef = useRef(null);
   const { webcamStream, micStream, webcamOn, micOn, isLocal, displayName } =
     useParticipant(participantId);
+
+  // Debug logging
+  useEffect(() => {
+    console.log(`🎥 [${displayName || participantId}] webcamOn:`, webcamOn, 'webcamStream:', !!webcamStream);
+  }, [webcamOn, webcamStream, displayName, participantId]);
 
   const videoStream = useMemo(() => {
     if (webcamOn && webcamStream) {
       const mediaStream = new MediaStream();
       mediaStream.addTrack(webcamStream.track);
+      console.log(`🎥 [${displayName || participantId}] Created video stream:`, mediaStream);
       return mediaStream;
     }
-  }, [webcamStream, webcamOn]);
+    console.log(`🎥 [${displayName || participantId}] No video stream - webcamOn:`, webcamOn, 'webcamStream:', !!webcamStream);
+    return null;
+  }, [webcamStream, webcamOn, displayName, participantId]);
 
   useEffect(() => {
     if (micRef.current) {
@@ -33,6 +41,18 @@ const ParticipantView = ({ participantId, isAudioCall }) => {
       }
     }
   }, [micStream, micOn]);
+
+  // Handle video stream
+  useEffect(() => {
+    if (videoRef.current && videoStream) {
+      videoRef.current.srcObject = videoStream;
+      videoRef.current.play().catch((error) => {
+        console.error(`🎥 [${displayName || participantId}] Video play error:`, error);
+      });
+    } else if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+  }, [videoStream, displayName, participantId]);
 
   return (
     <div className={styles.participantContainer} key={participantId}>
@@ -53,29 +73,13 @@ const ParticipantView = ({ participantId, isAudioCall }) => {
       {/* Audio stream */}
       <audio ref={micRef} autoPlay muted={isLocal} />
       
-      {/* Video stream - only if not audio call and webcam is on */}
-      {!isAudioCall && webcamOn && videoStream && (
+      {/* Video stream - show when webcam is on, regardless of call type */}
+      {webcamOn && videoStream ? (
         <div className={styles.videoContainer}>
-          <ReactPlayer
-            playsinline
-            pip={false}
-            light={false}
-            controls={false}
-            muted={true}
-            playing={true}
-            url={videoStream}
-            width="100%"
-            height="100%"
-            className={styles.videoPlayer}
-            onError={(err) => {
-              console.log(err, "participant video error");
-            }}
-          />
+          <video ref={videoRef} autoPlay muted />
         </div>
-      )}
-      
-      {/* Avatar when video is off or audio call */}
-      {(isAudioCall || !webcamOn) && (
+      ) : (
+        /* Avatar when video is off or not available */
         <div className={styles.avatarContainer}>
           <div className={styles.avatar}>
             {(displayName || 'User').charAt(0).toUpperCase()}

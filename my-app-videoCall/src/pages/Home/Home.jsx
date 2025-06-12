@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import CallingModal from '../CallingModal/CallingModal';
+import CallingModal from '../../components/CallingModal/CallingModal';
 import { createMeeting } from '../../utils/videoSdkHelpers/API';
 import socketService from '../../utils/socket';
 import styles from './Home.module.scss';

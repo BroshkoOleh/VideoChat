@@ -158,7 +158,6 @@ const MeetingView = forwardRef(({
                 <ParticipantView
                   key={participantId}
                   participantId={participantId}
-                  isAudioCall={isAudioCall}
                 />
               ))}
             </div>
@@ -170,14 +169,13 @@ const MeetingView = forwardRef(({
               >
                 {micOn ? '🎤' : '🚫🎤'} Мікрофон
               </button>
-              {!isAudioCall && (
-                <button 
-                  className={`${styles.controlBtn} ${styles.camera} ${webcamOn ? styles.active : styles.inactive}`}
-                  onClick={handleToggleWebcam}
-                >
-                  {webcamOn ? '📹' : '🚫📹'} Камера
-                </button>
-              )}
+              <button 
+                className={`${styles.controlBtn} ${styles.camera} ${webcamOn ? styles.active : styles.inactive}`}
+                onClick={handleToggleWebcam}
+                title={isAudioCall ? "Включити відео (аудіо дзвінок)" : "Увімкнути/вимкнути камеру"}
+              >
+                {webcamOn ? '📹' : '🚫📹'} Камера
+              </button>
               <button 
                 className={`${styles.controlBtn} ${styles.leave}`}
                 onClick={handleLeave}
