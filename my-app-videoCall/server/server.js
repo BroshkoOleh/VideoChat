@@ -54,7 +54,7 @@ io.on('connection', (socket) => {
   socket.on('initiate-call', (callData) => {
     console.log('Call initiated:', callData);
     
-    const { to, from, meetingId, type } = callData;
+    const { to, from, targetUser, meetingId, type } = callData;
     
     // Store active call
     activeCalls.set(meetingId, {
@@ -66,6 +66,7 @@ io.on('connection', (socket) => {
     // Send call invitation to target user
     socket.to(to).emit('incoming-call', {
       from,
+      targetUser,
       meetingId,
       type,
       timestamp: Date.now()

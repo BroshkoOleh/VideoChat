@@ -218,6 +218,7 @@ const Home = () => {
       const callData = {
         to: targetUser.key,
         from: currentUser,
+        targetUser: targetUser,
         meetingId: newMeetingId,
         type
       };
@@ -321,7 +322,17 @@ const Home = () => {
           ref={meetingViewRef}
           isOpen={callState !== 'idle'}
           onMeetingLeave={handleMeetingLeave}
-          userName={callState === 'calling' ? availableUsers.find(u => u.key === selectedUser)?.name : currentCall?.from?.name || 'Невідомий'}
+          userName={
+            callState === 'calling' 
+              ? currentCall?.targetUser?.name || 'Невідомий'
+              : callState === 'receiving' 
+                ? currentCall?.from?.name || 'Невідомий'
+                : callState === 'in-call'
+                  ? (currentCall?.from?.key === currentUser?.key 
+                      ? currentCall?.targetUser?.name 
+                      : currentCall?.from?.name) || 'Невідомий'
+                  : 'Невідомий'
+          }
           isAudioCall={currentCall?.type === 'audio'}
           meetingId={meetingId}
           callState={callState}
