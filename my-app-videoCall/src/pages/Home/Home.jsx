@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import CallingModal from "../../components/CallingModal/CallingModal";
 import { useVideoSDK } from "../../context/VideoSDKContext";
 import socketService from "../../utils/socket";
 import styles from "./Home.module.scss";
@@ -14,23 +13,16 @@ const Home = () => {
     currentUser,
     selectedUser,
     callState,
-    currentCall,
-    meetingId,
     onlineUsers,
     isSocketConnected,
 
     // Actions
-    handleMeetingLeave,
     handleMakeCall,
-    acceptCall,
     initializeSocket,
 
     // Setters
     setCurrentUser,
     setSelectedUser,
-
-    // Refs
-    meetingViewRef,
   } = useVideoSDK();
 
   // Authentication check
@@ -172,29 +164,6 @@ const Home = () => {
             </div>
           </div>
         )}
-
-        {/* Calling Modal */}
-        <CallingModal
-          ref={meetingViewRef}
-          isOpen={callState !== "idle"}
-          onMeetingLeave={handleMeetingLeave}
-          userName={
-            callState === "calling"
-              ? currentCall?.targetUser?.name || "Невідомий"
-              : callState === "receiving"
-              ? currentCall?.from?.name || "Невідомий"
-              : callState === "in-call"
-              ? (currentCall?.from?.key === currentUser?.key
-                  ? currentCall?.targetUser?.name
-                  : currentCall?.from?.name) || "Невідомий"
-              : "Невідомий"
-          }
-          isAudioCall={currentCall?.type === "audio"}
-          meetingId={meetingId}
-          callState={callState}
-          currentUser={currentUser}
-          onAcceptCall={acceptCall}
-        />
       </main>
     </div>
   );

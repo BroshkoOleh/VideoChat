@@ -1,13 +1,13 @@
 import React from "react";
-import AppRoutes from "./AppRouters";
 import { BrowserRouter as Router } from "react-router-dom";
 import { VideoSDKProvider } from "./context/VideoSDKContext";
+import AppContent from "./components/AppContent/AppContent";
 
 function App() {
   return (
     <Router>
       <VideoSDKProvider>
-        <AppRoutes />
+        <AppContent />
       </VideoSDKProvider>
     </Router>
   );
