@@ -8,7 +8,9 @@ const MeetingView = forwardRef(({
   userName, 
   isAudioCall, 
   callState, 
-  onAcceptCall 
+  onAcceptCall,
+  isPreviewVideoEnabled,
+  onTogglePreviewVideo
 }, ref) => {
   const [joined, setJoined] = useState(null);
   
@@ -84,6 +86,7 @@ const MeetingView = forwardRef(({
   const handleLeave = () => {
     leave();
   };
+  console.log("callState", callState);
 
   if (callState === 'receiving') {
     return (
@@ -99,6 +102,16 @@ const MeetingView = forwardRef(({
             {isAudioCall ? '📞 Аудіо дзвінок' : '📹 Відео дзвінок'}
           </p>
           <div className={styles.callActions}>
+            {/* Кнопка керування камерою прев'ю */}
+            {onTogglePreviewVideo && (
+              <button 
+                className={`${styles.actionBtn} ${styles.previewVideo} ${isPreviewVideoEnabled ? styles.active : styles.inactive}`}
+                onClick={onTogglePreviewVideo}
+                title={isPreviewVideoEnabled ? "Вимкнути відео" : "Увімкнути відео"}
+              >
+                {isPreviewVideoEnabled ? '📹' : '🚫📹'}
+              </button>
+            )}
             <button 
               className={`${styles.actionBtn} ${styles.accept}`}
               onClick={handleAccept}
@@ -128,14 +141,26 @@ const MeetingView = forwardRef(({
           </div>
           <h3 className={styles.callerName}>{userName}</h3>
           <p className={styles.callStatus}>Дзвонимо...</p>
-          <button 
-            className={`${styles.actionBtn} ${styles.cancel}`}
-            onClick={() => {
-              onMeetingLeave();
-            }}
-          >
-            📞 Скасувати
-          </button>
+          <div className={styles.callActions}>
+            {/* Кнопка керування камерою прев'ю */}
+            {onTogglePreviewVideo && (
+              <button 
+                className={`${styles.actionBtn} ${styles.previewVideo} ${isPreviewVideoEnabled ? styles.active : styles.inactive}`}
+                onClick={onTogglePreviewVideo}
+                title={isPreviewVideoEnabled ? "Вимкнути відео" : "Увімкнути відео"}
+              >
+                {isPreviewVideoEnabled ? '📹' : '🚫📹'}
+              </button>
+            )}
+            <button 
+              className={`${styles.actionBtn} ${styles.cancel}`}
+              onClick={() => {
+                onMeetingLeave();
+              }}
+            >
+              📞 Скасувати
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -146,12 +171,10 @@ const MeetingView = forwardRef(({
       <div className={styles.container}>
         {joined === "JOINED" ? (
           <div className={styles.meetingActive}>
-            <div className={styles.meetingHeader}>
+            {/* <div className={styles.meetingHeader}>
               <h3>🔗 З'єднано з {userName}</h3>
-              <p className={styles.participantCount}>
-                Учасників: {participants ? participants.size : 0}
-              </p>
-            </div>
+             
+            </div> */}
             
             <div className={styles.participantsGrid}>
               {participants && [...participants.keys()].map((participantId) => (
@@ -163,19 +186,20 @@ const MeetingView = forwardRef(({
             </div>
             
             <div className={styles.meetingControls}>
-              <button 
-                className={`${styles.controlBtn} ${styles.mic} ${micOn ? styles.active : styles.inactive}`}
-                onClick={handleToggleMic}
-              >
-                {micOn ? '🎤' : '🚫🎤'} Мікрофон
-              </button>
-              <button 
+            <button 
                 className={`${styles.controlBtn} ${styles.camera} ${webcamOn ? styles.active : styles.inactive}`}
                 onClick={handleToggleWebcam}
                 title={isAudioCall ? "Включити відео (аудіо дзвінок)" : "Увімкнути/вимкнути камеру"}
               >
                 {webcamOn ? '📹' : '🚫📹'} Камера
               </button>
+              <button 
+                className={`${styles.controlBtn} ${styles.mic} ${micOn ? styles.active : styles.inactive}`}
+                onClick={handleToggleMic}
+              >
+                {micOn ? '🎤' : '🚫🎤'} Мікрофон
+              </button>
+           
               <button 
                 className={`${styles.controlBtn} ${styles.leave}`}
                 onClick={handleLeave}

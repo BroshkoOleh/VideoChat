@@ -116,6 +116,31 @@
       background: linear-gradient(135deg, #2563eb, #1d4ed8);
     }
   }
+  
+  &.previewVideo {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: white;
+    
+    &:hover {
+      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    }
+    
+    &.active {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      
+      &:hover {
+        background: linear-gradient(135deg, #16a34a, #15803d);
+      }
+    }
+    
+    &.inactive {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      
+      &:hover {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+      }
+    }
+  }
 }
 
 .meetingActive {
