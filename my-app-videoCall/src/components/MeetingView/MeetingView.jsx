@@ -1,225 +1,178 @@
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
-import { useMeeting } from '@videosdk.live/react-sdk';
-import ParticipantView from '../ParticipantView/ParticipantView';
-import styles from './MeetingView.module.scss';
+import React, {
+  useState,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
+import { useMeeting } from "@videosdk.live/react-sdk";
+import ParticipantView from "../ParticipantView/ParticipantView";
+import styles from "./MeetingView.module.scss";
+import CallModal from "../CallModal/CallModal";
 
-const MeetingView = forwardRef(({ 
-  onMeetingLeave, 
-  userName, 
-  isAudioCall, 
-  callState, 
-  onAcceptCall,
-  isPreviewVideoEnabled,
-  onTogglePreviewVideo
-}, ref) => {
-  const [joined, setJoined] = useState(null);
-  
-  const { join, leave, toggleMic, toggleWebcam, participants, micOn, webcamOn } = useMeeting({
-    onMeetingJoined: () => {
-      console.log('✅ Meeting joined successfully');
-      setJoined("JOINED");
+const MeetingView = forwardRef(
+  (
+    {
+      onMeetingLeave,
+      userName,
+      isAudioCall,
+      callState,
+      onAcceptCall,
+      isPreviewVideoEnabled,
+      onTogglePreviewVideo,
     },
-    onMeetingLeft: () => {
-      console.log('📞 Meeting left');
-      onMeetingLeave();
-    },
-    onError: (error) => {
-      console.error('❌ Meeting error:', error);
-    }
-  });
+    ref
+  ) => {
+    const [joined, setJoined] = useState(null);
 
-  useImperativeHandle(ref, () => ({
-    triggerLeave: () => {
-      console.log('🔄 Triggered leave from socket event');
-      console.log('🔍 Current joined state:', joined);
-      console.log('🔍 Leave function available:', typeof leave);
-      if (joined === "JOINED") {
-        console.log('✅ Calling leave() from triggerLeave');
-        leave();
-      } else {
-        console.warn('❌ Cannot call leave() - not joined or joined state:', joined);
+    const {
+      join,
+      leave,
+      toggleMic,
+      toggleWebcam,
+      participants,
+      micOn,
+      webcamOn,
+    } = useMeeting({
+      onMeetingJoined: () => {
+        console.log("✅ Meeting joined successfully");
+        setJoined("JOINED");
+      },
+      onMeetingLeft: () => {
+        console.log("📞 Meeting left");
+        onMeetingLeave();
+      },
+      onError: (error) => {
+        console.error("❌ Meeting error:", error);
+      },
+    });
+
+    useImperativeHandle(
+      ref,
+      () => ({
+        triggerLeave: () => {
+          console.log("🔄 Triggered leave from socket event");
+          console.log("🔍 Current joined state:", joined);
+          console.log("🔍 Leave function available:", typeof leave);
+          if (joined === "JOINED") {
+            console.log("✅ Calling leave() from triggerLeave");
+            leave();
+          } else {
+            console.warn(
+              "❌ Cannot call leave() - not joined or joined state:",
+              joined
+            );
+          }
+        },
+      }),
+      [leave, joined]
+    );
+
+    // Auto-join when call state becomes 'in-call'
+    useEffect(() => {
+      if (callState === "in-call" && joined === null) {
+        console.log("🔗 Auto-joining meeting...");
+        setJoined("JOINING");
+        join();
       }
-    }
-  }), [leave, joined]);
+    }, [callState, joined, join]);
 
-  // Auto-join when call state becomes 'in-call'
-  useEffect(() => {
-    if (callState === 'in-call' && joined === null) {
-      console.log('🔗 Auto-joining meeting...');
-      setJoined("JOINING");
-      join();
-    }
-  }, [callState, joined, join]);
+    // Cleanup тільки при розмонтуванні компонента, не під час активного дзвінка
+    useEffect(() => {
+      return () => {
+        console.log("🧹 Component unmounting, cleaning up");
+        setJoined(null);
+      };
+    }, []);
 
-  // Cleanup тільки при розмонтуванні компонента, не під час активного дзвінка
-  useEffect(() => {
-    return () => {
-      console.log('🧹 Component unmounting, cleaning up');
-      setJoined(null);
+    // Debug: log joined state changes
+    useEffect(() => {
+      console.log("🔍 MeetingView joined state changed:", joined);
+    }, [joined]);
+
+    const handleAccept = () => {
+      onAcceptCall();
     };
-  }, []);
 
-  // Debug: log joined state changes
-  useEffect(() => {
-    console.log('🔍 MeetingView joined state changed:', joined);
-  }, [joined]);
+    const handleReject = () => {
+      onMeetingLeave();
+    };
 
-  const handleAccept = () => {
-    onAcceptCall();
-  };
+    // Виправлено: toggleMic без передачі event об'єкта
+    const handleToggleMic = () => {
+      toggleMic();
+    };
 
-  const handleReject = () => {
-    onMeetingLeave();
-  };
+    // Виправлено: toggleWebcam без передачі event об'єкта
+    const handleToggleWebcam = () => {
+      toggleWebcam();
+    };
 
-  // Виправлено: toggleMic без передачі event об'єкта
-  const handleToggleMic = () => {
-    toggleMic();
-  };
+    // Виправлено: leave з правильним очищенням
+    const handleLeave = () => {
+      leave();
+    };
+    console.log("callState", callState);
 
-  // Виправлено: toggleWebcam без передачі event об'єкта  
-  const handleToggleWebcam = () => {
-    toggleWebcam();
-  };
+    // приймач дзвінка
+    if (callState === "receiving") {
+      return (
+        <CallModal
+          handleAccept={handleAccept}
+          handleReject={handleReject}
+          userName={userName}
+          callState={callState}
+          micOn={micOn}
+          webcamOn={webcamOn}
+        />
+      );
+    }
 
-  // Виправлено: leave з правильним очищенням
-  const handleLeave = () => {
-    leave();
-  };
-  console.log("callState", callState);
+    // ініціатор дзвінка
 
-  if (callState === 'receiving') {
-    return (
-      <div className={styles.container}>
-        <div className={styles.incomingCall}>
-          <div className={styles.userAvatar}>
-            <div className={styles.avatarCircle}>
-              {userName.charAt(0).toUpperCase()}
-            </div>
-          </div>
-          <h3 className={styles.callerName}>{userName}</h3>
-          <p className={styles.callType}>
-            {isAudioCall ? '📞 Аудіо дзвінок' : '📹 Відео дзвінок'}
-          </p>
-          <div className={styles.callActions}>
-            {/* Кнопка керування камерою прев'ю */}
-            {onTogglePreviewVideo && (
-              <button 
-                className={`${styles.actionBtn} ${styles.previewVideo} ${isPreviewVideoEnabled ? styles.active : styles.inactive}`}
-                onClick={onTogglePreviewVideo}
-                title={isPreviewVideoEnabled ? "Вимкнути відео" : "Увімкнути відео"}
-              >
-                {isPreviewVideoEnabled ? '📹' : '🚫📹'}
-              </button>
-            )}
-            <button 
-              className={`${styles.actionBtn} ${styles.accept}`}
-              onClick={handleAccept}
-            >
-              ✅ Прийняти
-            </button>
-            <button 
-              className={`${styles.actionBtn} ${styles.reject}`}
-              onClick={handleReject}
-            >
-              ❌ Відхилити
-            </button>
-          </div>
+    if (callState === "calling") {
+      return (
+        <CallModal
+          handleAccept={handleAccept}
+          handleReject={handleReject}
+          userName={userName}
+          callState={callState}
+          micOn={micOn}
+          webcamOn={webcamOn}
+        />
+      );
+    }
+
+    if (callState === "in-call") {
+      return (
+        <div className={styles.container}>
+          {joined === "JOINED" ? (
+            <CallModal
+              handleAccept={handleAccept}
+              handleReject={handleReject}
+              userName={userName}
+              callState={callState}
+              micOn={micOn}
+              webcamOn={webcamOn}
+            />
+          ) : (
+            <CallModal
+              handleAccept={handleAccept}
+              handleReject={handleReject}
+              userName={userName}
+              callState={callState}
+              callingType="connecting"
+              micOn={micOn}
+              webcamOn={webcamOn}
+            />
+          )}
         </div>
-      </div>
-    );
+      );
+    }
+
+    return null;
   }
+);
 
-  if (callState === 'calling') {
-    return (
-      <div className={styles.container}>
-        <div className={styles.outgoingCall}>
-          <div className={styles.userAvatar}>
-            <div className={styles.avatarCircle}>
-              {userName.charAt(0).toUpperCase()}
-            </div>
-          </div>
-          <h3 className={styles.callerName}>{userName}</h3>
-          <p className={styles.callStatus}>Дзвонимо...</p>
-          <div className={styles.callActions}>
-            {/* Кнопка керування камерою прев'ю */}
-            {onTogglePreviewVideo && (
-              <button 
-                className={`${styles.actionBtn} ${styles.previewVideo} ${isPreviewVideoEnabled ? styles.active : styles.inactive}`}
-                onClick={onTogglePreviewVideo}
-                title={isPreviewVideoEnabled ? "Вимкнути відео" : "Увімкнути відео"}
-              >
-                {isPreviewVideoEnabled ? '📹' : '🚫📹'}
-              </button>
-            )}
-            <button 
-              className={`${styles.actionBtn} ${styles.cancel}`}
-              onClick={() => {
-                onMeetingLeave();
-              }}
-            >
-              📞 Скасувати
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (callState === 'in-call') {
-    return (
-      <div className={styles.container}>
-        {joined === "JOINED" ? (
-          <div className={styles.meetingActive}>
-            {/* <div className={styles.meetingHeader}>
-              <h3>🔗 З'єднано з {userName}</h3>
-             
-            </div> */}
-            
-            <div className={styles.participantsGrid}>
-              {participants && [...participants.keys()].map((participantId) => (
-                <ParticipantView
-                  key={participantId}
-                  participantId={participantId}
-                />
-              ))}
-            </div>
-            
-            <div className={styles.meetingControls}>
-            <button 
-                className={`${styles.controlBtn} ${styles.camera} ${webcamOn ? styles.active : styles.inactive}`}
-                onClick={handleToggleWebcam}
-                title={isAudioCall ? "Включити відео (аудіо дзвінок)" : "Увімкнути/вимкнути камеру"}
-              >
-                {webcamOn ? '📹' : '🚫📹'} Камера
-              </button>
-              <button 
-                className={`${styles.controlBtn} ${styles.mic} ${micOn ? styles.active : styles.inactive}`}
-                onClick={handleToggleMic}
-              >
-                {micOn ? '🎤' : '🚫🎤'} Мікрофон
-              </button>
-           
-              <button 
-                className={`${styles.controlBtn} ${styles.leave}`}
-                onClick={handleLeave}
-              >
-                📞 Завершити
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className={styles.connecting}>
-            <p>🔄 З'єднання...</p>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  return null;
-});
-
-MeetingView.displayName = 'MeetingView';
+MeetingView.displayName = "MeetingView";
 
 export default MeetingView;

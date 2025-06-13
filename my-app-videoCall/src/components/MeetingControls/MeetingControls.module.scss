@@ -1,89 +1,57 @@
-.controls {
+.actionsBtns {
   display: flex;
+  align-items: end;
+  justify-content: center;
   gap: 15px;
-  justify-content: center;
-  align-items: center;
-  margin-top: 20px;
 }
 
-.controlButton {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.actionsBtnsBx {
   cursor: pointer;
-  transition: all 0.3s ease;
-  color: white;
+  background-color: white;
 
-  &:hover {
-    transform: scale(1.1);
-  }
+  .image {
+    width: 36px;
+    height: 36px;
+    background-color: #141414;
+    border-radius: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-  &:active {
-    transform: scale(0.95);
-  }
-  
-  &.active {
-    background: linear-gradient(135deg, #4CAF50, #45a049);
-
-    &:hover {
-      background: linear-gradient(135deg, #45a049, #3d8b40);
+    img {
+      width: 20px !important;
+      height: 20px !important;
+      margin-bottom: 0 !important;
+      object-fit: contain !important;
     }
   }
-  
-  &.inactive {
-    background: linear-gradient(135deg, #f44336, #d32f2f);
 
-    &:hover {
-      background: linear-gradient(135deg, #d32f2f, #b71c1c);
-    }
+  span {
+    color: #141414;
+    text-align: center;
+    font-family: var(--Poppins_font);
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 10.356px;
+  }
+
+  &.accept .image {
+    background: linear-gradient(180deg, #62d2c1 0%, #71e079 100%) !important;
+  }
+
+  &.call .image {
+    background: linear-gradient(180deg, #e63946 0%, #d52d3a 100%) !important;
   }
 }
 
-.videoButton {
-  background: linear-gradient(135deg, #2196F3, #1976D2);
-
-  &:hover {
-    background: linear-gradient(135deg, #1976D2, #1565C0);
-  }
-
-  &:disabled {
-    background: #666;
-    cursor: not-allowed;
-    
-    &:hover {
-      transform: none;
-    }
+.microphone {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  .image {
+    background: linear-gradient(180deg, #62d2c1 0%, #71e079 100%);
   }
 }
-
-.micButton {
-  background: linear-gradient(135deg, #4CAF50, #45a049);
-
-  &:hover {
-    background: linear-gradient(135deg, #45a049, #3d8b40);
-  }
-}
-
-.endButton {
-  background: linear-gradient(135deg, #f44336, #d32f2f);
-
-  &:hover {
-    background: linear-gradient(135deg, #d32f2f, #b71c1c);
-  }
-}
-
-// Responsive design
-@media (max-width: 768px) {
-  .controls {
-    gap: 10px;
-  }
-
-  .controlButton {
-    width: 45px;
-    height: 45px;
-  }
-} 
