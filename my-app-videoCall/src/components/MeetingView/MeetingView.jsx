@@ -110,7 +110,7 @@ const MeetingView = forwardRef(
 
     if (callState === "receiving") {
       return (
-        <div className={styles.container}>
+        <div className={styles.modalViewContainer}>
           <div className={styles.incomingCall}>
             <div className={styles.userAvatar}>
               <div className={styles.avatarCircle}>
@@ -156,7 +156,7 @@ const MeetingView = forwardRef(
 
     if (callState === "calling") {
       return (
-        <div className={styles.container}>
+        <div className={styles.modalViewContainer}>
           <div className={styles.outgoingCall}>
             <div className={styles.userAvatar}>
               <div className={styles.avatarCircle}>
@@ -196,7 +196,7 @@ const MeetingView = forwardRef(
 
     if (callState === "in-call") {
       return (
-        <div className={styles.container}>
+        <div className={styles.modalViewContainer}>
           {joined === "JOINED" ? (
             <div className={styles.meetingActive}>
               <div className={styles.participantsGrid}>

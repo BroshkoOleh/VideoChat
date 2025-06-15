@@ -19,7 +19,7 @@ const GlobalModalContainer = () => {
     meetingViewRef,
   } = useVideoSDK();
 
-  const [isExpanded, setIsExpanded] = useState(false);
+  // const [isExpanded, setIsExpanded] = useState(false);
   const [isVideoEnabled, setIsVideoEnabled] = useState(false);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
@@ -42,9 +42,9 @@ const GlobalModalContainer = () => {
   // Визначаємо тип дзвінка
   const isAudioCall = currentCall?.type === "audio";
 
-  const handleToggleExpand = () => {
-    setIsExpanded(!isExpanded);
-  };
+  // const handleToggleExpand = () => {
+  //   setIsExpanded(!isExpanded);
+  // };
 
   // Отримуємо доступ до камери користувача
   useEffect(() => {
@@ -84,59 +84,19 @@ const GlobalModalContainer = () => {
     };
   }, [isVideoEnabled]);
 
-  const toggleVideo = () => {
-    if (!isExpanded) {
-      setIsExpanded(!isExpanded);
-    }
+  // const toggleVideo = () => {
+  //   if (!isExpanded) {
+  //     setIsExpanded(!isExpanded);
+  //   }
 
-    setIsVideoEnabled(!isVideoEnabled);
-  };
+  //   setIsVideoEnabled(!isVideoEnabled);
+  // };
 
   if (!isOpen || !meetingId) return null;
 
-  console.log("isVideoEnabled", isVideoEnabled);
-
   return (
     <div className={styles.overlay}>
-      <div
-        className={`${styles.modal} ${isExpanded ? styles.expanded : ""}`}
-        onDoubleClick={handleToggleExpand}
-      >
-        {/* Відео прев'ю тільки для calling та receiving */}
-        {(callState === "calling" || callState === "receiving") &&
-        isExpanded &&
-        isVideoEnabled ? (
-          <div className={styles.videoPreview}>
-            <div className={styles.videoContainer}>
-              {isVideoEnabled ? (
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  muted
-                  playsInline
-                  className={styles.videoElement}
-                />
-              ) : (
-                <div className={styles.avatarPreview}>
-                  <div className={styles.avatarCircle}>
-                    {currentUser?.name?.charAt(0)?.toUpperCase() || "U"}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div></div>
-        )}
-
-        <div className={styles.topControls}>
-          <button
-            className={styles.expandButton}
-            onClick={handleToggleExpand}
-            title={isExpanded ? "Minimize window" : "Expand window"}
-          ></button>
-        </div>
-
+      <div className={styles.modal}>
         <MeetingView
           ref={meetingViewRef}
           onMeetingLeave={handleMeetingLeave}
@@ -145,7 +105,7 @@ const GlobalModalContainer = () => {
           callState={callState}
           onAcceptCall={acceptCall}
           isPreviewVideoEnabled={isVideoEnabled}
-          onTogglePreviewVideo={toggleVideo}
+          // onTogglePreviewVideo={toggleVideo}
         />
       </div>
     </div>
