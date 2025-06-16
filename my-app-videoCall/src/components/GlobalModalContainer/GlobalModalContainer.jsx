@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import MeetingView from "../MeetingView/MeetingView";
 import { useVideoSDK } from "../../context/VideoSDKContext";
 import styles from "./GlobalModalContainer.module.scss";
@@ -11,18 +11,9 @@ const GlobalModalContainer = () => {
     meetingId,
     currentUser,
 
-    // Actions
-    handleMeetingLeave,
-    acceptCall,
-
     // Refs
     meetingViewRef,
   } = useVideoSDK();
-
-  // const [isExpanded, setIsExpanded] = useState(false);
-  const [isVideoEnabled, setIsVideoEnabled] = useState(false);
-  const videoRef = useRef(null);
-  const streamRef = useRef(null);
 
   // Визначаємо чи модал відкритий
   const isOpen = callState !== "idle";
@@ -42,56 +33,6 @@ const GlobalModalContainer = () => {
   // Визначаємо тип дзвінка
   const isAudioCall = currentCall?.type === "audio";
 
-  // const handleToggleExpand = () => {
-  //   setIsExpanded(!isExpanded);
-  // };
-
-  // Отримуємо доступ до камери користувача
-  useEffect(() => {
-    const setupVideo = async () => {
-      try {
-        if (isVideoEnabled) {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: true,
-            audio: false,
-          });
-          streamRef.current = stream;
-          if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-          }
-        } else {
-          if (streamRef.current) {
-            streamRef.current.getTracks().forEach((track) => track.stop());
-            streamRef.current = null;
-          }
-          if (videoRef.current) {
-            videoRef.current.srcObject = null;
-          }
-        }
-      } catch (error) {
-        console.error("Error accessing camera:", error);
-        setIsVideoEnabled(false);
-      }
-    };
-
-    setupVideo();
-
-    // Cleanup при розмонтуванні
-    return () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop());
-      }
-    };
-  }, [isVideoEnabled]);
-
-  // const toggleVideo = () => {
-  //   if (!isExpanded) {
-  //     setIsExpanded(!isExpanded);
-  //   }
-
-  //   setIsVideoEnabled(!isVideoEnabled);
-  // };
-
   if (!isOpen || !meetingId) return null;
 
   return (
@@ -99,13 +40,9 @@ const GlobalModalContainer = () => {
       <div className={styles.modal}>
         <MeetingView
           ref={meetingViewRef}
-          onMeetingLeave={handleMeetingLeave}
           userName={userName}
           isAudioCall={isAudioCall}
           callState={callState}
-          onAcceptCall={acceptCall}
-          isPreviewVideoEnabled={isVideoEnabled}
-          // onTogglePreviewVideo={toggleVideo}
         />
       </div>
     </div>

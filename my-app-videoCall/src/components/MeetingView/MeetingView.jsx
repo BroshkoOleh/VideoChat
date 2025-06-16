@@ -3,22 +3,23 @@ import { useMeeting } from "@videosdk.live/react-sdk";
 import { useVideoSDK } from "../../context/VideoSDKContext";
 import ParticipantView from "../ParticipantView/ParticipantView";
 import styles from "./MeetingView.module.scss";
+import CallModal from "../CallModal/CallModal";
 
 const MeetingView = forwardRef(
   (
     {
-      onMeetingLeave,
+      // onMeetingLeave,
       userName,
       isAudioCall,
       callState,
-      onAcceptCall,
-      isPreviewVideoEnabled,
-      onTogglePreviewVideo,
+      // onAcceptCall,
+      // isPreviewVideoEnabled,
+      // onTogglePreviewVideo,
     },
     ref
   ) => {
     // Використовуємо централізований контекст
-    const { joined, setJoined } = useVideoSDK();
+    const { joined, setJoined, handleMeetingLeave, meetingId } = useVideoSDK();
 
     const {
       join,
@@ -26,23 +27,27 @@ const MeetingView = forwardRef(
       toggleMic,
       toggleWebcam,
       participants,
-      micOn,
-      webcamOn,
+      localMicOn,
+      localWebcamOn,
     } = useMeeting({
       onMeetingJoined: () => {
         console.log("✅ Meeting joined successfully");
+        console.log("👥 Current participants:", participants?.size || 0);
         setJoined("JOINED");
       },
       onMeetingLeft: () => {
         console.log("📞 Meeting left");
+        console.log("🔄 Resetting joined state and calling handleMeetingLeave");
         setJoined(null);
-        onMeetingLeave();
+        handleMeetingLeave();
       },
       onError: (error) => {
         console.error("❌ Meeting error:", error);
+        console.log("🔄 Resetting joined state due to error");
+        setJoined(null);
       },
     });
-
+    // console.log("participants", participants);
     useImperativeHandle(
       ref,
       () => ({
@@ -66,10 +71,17 @@ const MeetingView = forwardRef(
 
     // Auto-join when call state becomes 'in-call'
     useEffect(() => {
+      console.log("🔍 Auto-join check:", { callState, joined, meetingId });
+
       if (callState === "in-call" && joined === null) {
         console.log("🔗 Auto-joining meeting...");
         setJoined("JOINING");
-        join();
+
+        // Додаємо невелику затримку для синхронізації
+        setTimeout(() => {
+          console.log("⚡ Executing join() after timeout");
+          join();
+        }, 100);
       }
     }, [callState, joined, join, setJoined]);
 
@@ -85,16 +97,17 @@ const MeetingView = forwardRef(
       console.log("🔍 MeetingView joined state changed:", joined);
     }, [joined]);
 
-    const handleAccept = () => {
-      onAcceptCall();
-    };
+    // const handleAccept = () => {
+    //   onAcceptCall();
+    // };
 
-    const handleReject = () => {
-      onMeetingLeave();
-    };
+    // const handleReject = () => {
+    //   onMeetingLeave();
+    // };
 
     // Контроли мітингу
     const handleToggleMic = () => {
+      console.log("handleToggleMic");
       toggleMic();
     };
 
@@ -110,141 +123,173 @@ const MeetingView = forwardRef(
 
     if (callState === "receiving") {
       return (
-        <div className={styles.modalViewContainer}>
-          <div className={styles.incomingCall}>
-            <div className={styles.userAvatar}>
-              <div className={styles.avatarCircle}>
-                {userName.charAt(0).toUpperCase()}
-              </div>
-            </div>
-            <h3 className={styles.callerName}>{userName}</h3>
-            <p className={styles.callType}>
-              {isAudioCall ? "📞 Аудіо дзвінок" : "📹 Відео дзвінок"}
-            </p>
-            <div className={styles.callActions}>
-              {/* Кнопка керування камерою прев'ю */}
-              {onTogglePreviewVideo && (
-                <button
-                  className={`${styles.actionBtn} ${styles.previewVideo} ${
-                    isPreviewVideoEnabled ? styles.active : styles.inactive
-                  }`}
-                  onClick={onTogglePreviewVideo}
-                  title={
-                    isPreviewVideoEnabled ? "Вимкнути відео" : "Увімкнути відео"
-                  }
-                >
-                  {isPreviewVideoEnabled ? "📹" : "🚫📹"}
-                </button>
-              )}
-              <button
-                className={`${styles.actionBtn} ${styles.accept}`}
-                onClick={handleAccept}
-              >
-                ✅ Прийняти
-              </button>
-              <button
-                className={`${styles.actionBtn} ${styles.reject}`}
-                onClick={handleReject}
-              >
-                ❌ Відхилити
-              </button>
-            </div>
-          </div>
-        </div>
+        <CallModal
+          userName={userName}
+          isAudioCall={isAudioCall}
+          // onAcceptCall={handleAccept}
+          // onRejectCall={handleReject}
+          // onTogglePreviewVideo={onTogglePreviewVideo}
+        />
+        // <div className={styles.modalViewContainer}>
+        //   <div className={styles.incomingCall}>
+        //     <div className={styles.userAvatar}>
+        //       <div className={styles.avatarCircle}>
+        //         {userName.charAt(0).toUpperCase()}
+        //       </div>
+        //     </div>
+        //     <h3 className={styles.callerName}>{userName}</h3>
+        //     <p className={styles.callType}>
+        //       {isAudioCall ? "📞 Аудіо дзвінок" : "📹 Відео дзвінок"}
+        //     </p>
+        //     <div className={styles.callActions}>
+        //       {/* Кнопка керування камерою прев'ю */}
+        //       {onTogglePreviewVideo && (
+        //         <button
+        //           className={`${styles.actionBtn} ${styles.previewVideo} ${
+        //             isPreviewVideoEnabled ? styles.active : styles.inactive
+        //           }`}
+        //           onClick={onTogglePreviewVideo}
+        //           title={
+        //             isPreviewVideoEnabled ? "Вимкнути відео" : "Увімкнути відео"
+        //           }
+        //         >
+        //           {isPreviewVideoEnabled ? "📹" : "🚫📹"}
+        //         </button>
+        //       )}
+        //       <button
+        //         className={`${styles.actionBtn} ${styles.accept}`}
+        //         onClick={handleAccept}
+        //       >
+        //         ✅ Прийняти
+        //       </button>
+        //       <button
+        //         className={`${styles.actionBtn} ${styles.reject}`}
+        //         onClick={handleReject}
+        //       >
+        //         ❌ Відхилити
+        //       </button>
+        //     </div>
+        //   </div>
+        // </div>
       );
     }
 
     if (callState === "calling") {
       return (
-        <div className={styles.modalViewContainer}>
-          <div className={styles.outgoingCall}>
-            <div className={styles.userAvatar}>
-              <div className={styles.avatarCircle}>
-                {userName.charAt(0).toUpperCase()}
-              </div>
-            </div>
-            <h3 className={styles.callerName}>{userName}</h3>
-            <p className={styles.callStatus}>Дзвонимо...</p>
-            <div className={styles.callActions}>
-              {/* Кнопка керування камерою прев'ю */}
-              {onTogglePreviewVideo && (
-                <button
-                  className={`${styles.actionBtn} ${styles.previewVideo} ${
-                    isPreviewVideoEnabled ? styles.active : styles.inactive
-                  }`}
-                  onClick={onTogglePreviewVideo}
-                  title={
-                    isPreviewVideoEnabled ? "Вимкнути відео" : "Увімкнути відео"
-                  }
-                >
-                  {isPreviewVideoEnabled ? "📹" : "🚫📹"}
-                </button>
-              )}
-              <button
-                className={`${styles.actionBtn} ${styles.cancel}`}
-                onClick={() => {
-                  onMeetingLeave();
-                }}
-              >
-                📞 Скасувати
-              </button>
-            </div>
-          </div>
-        </div>
+        <CallModal
+          userName={userName}
+          isAudioCall={isAudioCall}
+          // onAcceptCall={handleAccept}
+          // onRejectCall={handleReject}
+          // onTogglePreviewVideo={onTogglePreviewVideo}
+        />
+        // <div className={styles.modalViewContainer}>
+        //   <div className={styles.outgoingCall}>
+        //     <div className={styles.userAvatar}>
+        //       <div className={styles.avatarCircle}>
+        //         {userName.charAt(0).toUpperCase()}
+        //       </div>
+        //     </div>
+        //     <h3 className={styles.callerName}>{userName}</h3>
+        //     <p className={styles.callStatus}>Дзвонимо...</p>
+        //     <div className={styles.callActions}>
+        //       {/* Кнопка керування камерою прев'ю */}
+        //       {/* {onTogglePreviewVideo && (
+        //         <button
+        //           className={`${styles.actionBtn} ${styles.previewVideo} ${
+        //             isPreviewVideoEnabled ? styles.active : styles.inactive
+        //           }`}
+        //           onClick={onTogglePreviewVideo}
+        //           title={
+        //             isPreviewVideoEnabled ? "Вимкнути відео" : "Увімкнути відео"
+        //           }
+        //         >
+        //           {isPreviewVideoEnabled ? "📹" : "🚫📹"}
+        //         </button>
+        //       )} */}
+        //       <button
+        //         className={`${styles.actionBtn} ${styles.cancel}`}
+        //         onClick={() => {
+        //           onMeetingLeave();
+        //         }}
+        //       >
+        //         📞 Скасувати
+        //       </button>
+        //     </div>
+        //   </div>
+        // </div>
       );
     }
 
+    // if (callState === "in-call") {
+    //   return (
+    //     <div className={styles.modalViewContainer}>
+    //       {joined === "JOINED" ? (
+    //         <div className={styles.meetingActive}>
+    //           <div className={styles.participantsGrid}>
+    //             {participants &&
+    //               [...participants.keys()].map((participantId) => (
+    //                 <ParticipantView
+    //                   key={participantId}
+    //                   participantId={participantId}
+    //                 />
+    //               ))}
+    //           </div>
+
+    //           <div className={styles.meetingControls}>
+    //             <button
+    //               className={`${styles.controlBtn} ${styles.camera} ${
+    //                 localWebcamOn ? styles.active : styles.inactive
+    //               }`}
+    //               onClick={handleToggleWebcam}
+    //               title={
+    //                 isAudioCall
+    //                   ? "Включити відео (аудіо дзвінок)"
+    //                   : "Увімкнути/вимкнути камеру"
+    //               }
+    //             >
+    //               {localWebcamOn ? "📹" : "🚫📹"} Камера
+    //             </button>
+    //             <button
+    //               className={`${styles.controlBtn} ${styles.mic} ${
+    //                 localMicOn ? styles.active : styles.inactive
+    //               }`}
+    //               onClick={handleToggleMic}
+    //             >
+    //               {localMicOn ? "🎤" : "🚫🎤"} Мікрофон
+    //             </button>
+
+    //             <button
+    //               className={`${styles.controlBtn} ${styles.leave}`}
+    //               onClick={handleLeave}
+    //             >
+    //               📞 Завершити
+    //             </button>
+    //           </div>
+    //         </div>
+    //       ) : (
+    //         <div className={styles.connecting}>
+    //           <p>🔄 З'єднання...</p>
+    //         </div>
+    //       )}
+    //     </div>
+    //   );
+    // }
     if (callState === "in-call") {
       return (
-        <div className={styles.modalViewContainer}>
-          {joined === "JOINED" ? (
-            <div className={styles.meetingActive}>
-              <div className={styles.participantsGrid}>
-                {participants &&
-                  [...participants.keys()].map((participantId) => (
-                    <ParticipantView
-                      key={participantId}
-                      participantId={participantId}
-                    />
-                  ))}
-              </div>
-
-              <div className={styles.meetingControls}>
-                <button
-                  className={`${styles.controlBtn} ${styles.camera} ${
-                    webcamOn ? styles.active : styles.inactive
-                  }`}
-                  onClick={handleToggleWebcam}
-                  title={
-                    isAudioCall
-                      ? "Включити відео (аудіо дзвінок)"
-                      : "Увімкнути/вимкнути камеру"
-                  }
-                >
-                  {webcamOn ? "📹" : "🚫📹"} Камера
-                </button>
-                <button
-                  className={`${styles.controlBtn} ${styles.mic} ${
-                    micOn ? styles.active : styles.inactive
-                  }`}
-                  onClick={handleToggleMic}
-                >
-                  {micOn ? "🎤" : "🚫🎤"} Мікрофон
-                </button>
-
-                <button
-                  className={`${styles.controlBtn} ${styles.leave}`}
-                  onClick={handleLeave}
-                >
-                  📞 Завершити
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className={styles.connecting}>
-              <p>🔄 З'єднання...</p>
-            </div>
-          )}
+        <div>
+          <CallModal
+            userName={userName}
+            isAudioCall={isAudioCall}
+            localMicOn={localMicOn}
+            localWebcamOn={localWebcamOn}
+            participants={participants}
+            joined={joined}
+            callState={callState}
+            // onAcceptCall={handleAccept}
+            // onRejectCall={handleReject}
+            // onTogglePreviewVideo={onTogglePreviewVideo}
+          />
         </div>
       );
     }

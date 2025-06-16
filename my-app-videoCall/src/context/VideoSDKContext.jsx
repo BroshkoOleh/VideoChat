@@ -25,6 +25,7 @@ export const VideoSDKProvider = ({ children }) => {
   const [callState, setCallState] = useState("idle");
   const [currentCall, setCurrentCall] = useState(null);
   const [joined, setJoined] = useState(null);
+  const [initialMicOn, setInitialMicOn] = useState(true);
 
   // User states
   const [currentUser, setCurrentUser] = useState(null);
@@ -118,10 +119,12 @@ export const VideoSDKProvider = ({ children }) => {
 
   const acceptCall = () => {
     if (currentCall) {
+      console.log("📞 Accepting call, transitioning to in-call state...");
       socketService.acceptCall({
         meetingId: currentCall.meetingId,
         from: currentCall.from,
       });
+      // ✅ Користувач який приймає одразу переходить в стан in-call
       setCallState("in-call");
     }
   };
@@ -171,6 +174,7 @@ export const VideoSDKProvider = ({ children }) => {
       setCallState("idle");
       setCurrentCall(null);
       setMeetingId("");
+      setJoined(null);
     });
 
     socketService.on("call-cancelled", () => {
@@ -181,6 +185,7 @@ export const VideoSDKProvider = ({ children }) => {
       setCallState("idle");
       setCurrentCall(null);
       setMeetingId("");
+      setJoined(null);
     });
 
     socketService.on("call-ended", () => {
@@ -191,6 +196,7 @@ export const VideoSDKProvider = ({ children }) => {
       setCallState("idle");
       setCurrentCall(null);
       setMeetingId("");
+      setJoined(null);
     });
   }, []);
 
@@ -205,6 +211,7 @@ export const VideoSDKProvider = ({ children }) => {
     selectedUser,
     onlineUsers,
     isSocketConnected,
+    initialMicOn,
 
     // Actions
     createNewMeeting,
@@ -217,6 +224,7 @@ export const VideoSDKProvider = ({ children }) => {
     setCurrentUser,
     setSelectedUser,
     setJoined,
+    setInitialMicOn,
 
     // Refs
     meetingViewRef,
@@ -228,7 +236,7 @@ export const VideoSDKProvider = ({ children }) => {
         <MeetingProvider
           config={{
             meetingId,
-            micEnabled: true,
+            micEnabled: initialMicOn,
             webcamEnabled: false,
             name: currentUser?.name || "User",
           }}

@@ -6,28 +6,31 @@ import Zoom1 from "../../assets/icons/zoom_out1.svg";
 import profileCircle from "../../assets/icons/profile-circle.svg";
 import styles from "./CallModal.module.scss";
 import MeetingControls from "../MeetingControls/MeetingControls";
+import ParticipantView from "../ParticipantView/ParticipantView";
 
 //Accept call or reject component modal
 
 function CallModal({
-  handleAccept,
-  handleReject,
+  // handleAccept,
+  // handleReject,
   userName,
-  callingType,
-  // userDetail,
+  localMicOn,
+  localWebcamOn,
+  participants,
+  joined,
   callState,
+  // userDetail,
+  // callState,
   // onAccept,
   // onDecline,
   // onZoomClick
-  micOn,
-  webcamOn,
+  // micOn,
+  // webcamOn,
 }) {
   return (
     <div
       // className={`modal call_model ${isPositionChanged ? "calling-position-change1" : ""}`}
-      id="videoModalToggle5"
-      aria-hidden="true"
-      tabIndex="-1"
+
       style={{ display: "block" }}
     >
       <div
@@ -46,19 +49,37 @@ function CallModal({
             <div className={styles.content}>
               {/* <h4>{userDetail?.name || "Unknown Caller"}</h4> */}
               <h4>{userName || "Unknown Caller"}</h4>
-              <p>
-                ({callingType === "connecting" ? "Connecting..." : "Calling..."}
-                )
-              </p>
+              {joined === "JOINED" ? (
+                <p>({"timer"})</p>
+              ) : (
+                <div className={styles.connecting}>
+                  <p>
+                    {callState !== "in-call" ? "Calling..." : "Connecting..."}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className={styles.meetingActive}>
+            <div className={styles.participantsGrid}>
+              {participants &&
+                [...participants.keys()].map((participantId) => (
+                  <ParticipantView
+                    key={participantId}
+                    participantId={participantId}
+                  />
+                ))}
             </div>
           </div>
 
           <MeetingControls
-            handleAccept={handleAccept}
-            handleReject={handleReject}
-            callState={callState}
-            micOn={micOn}
-            webcamOn={webcamOn}
+            localMicOn={localMicOn}
+            localWebcamOn={localWebcamOn}
+            // handleAccept={handleAccept}
+            // handleReject={handleReject}
+            // callState={callState}
+            // micOn={micOn}
+            // webcamOn={webcamOn}
           />
 
           <button

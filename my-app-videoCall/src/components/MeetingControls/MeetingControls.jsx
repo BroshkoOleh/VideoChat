@@ -7,33 +7,48 @@ import MicrophoneOff from "../../assets/icons/microOff.svg";
 
 import { useMeeting } from "@videosdk.live/react-sdk";
 import styles from "./MeetingControls.module.scss";
+import { useVideoSDK } from "../../context/VideoSDKContext";
+// const { webcamOn, micOn } = useParticipant(participantId);
 
-const MeetingControls = ({ handleAccept, handleReject, callState }) => {
-  const { leave, toggleMic, toggleWebcam, micOn, webcamOn } = useMeeting();
+const MeetingControls = ({ localMicOn, localWebcamOn }) => {
+  const {
+    callState,
+    acceptCall,
+    handleMeetingLeave,
+    setInitialMicOn,
+    initialMicOn,
+  } = useVideoSDK();
 
-  console.log("micOn", micOn);
-  console.log("webcamOn", webcamOn);
+  const { toggleMic, toggleWebcam } = useMeeting();
+
+  console.log("callState", callState);
+
+  const handleAccept = () => {
+    acceptCall();
+  };
+
+  const handleReject = () => {
+    handleMeetingLeave();
+  };
 
   const handleToggleMic = () => {
     toggleMic();
   };
+  const setUpInitialMicOn = () => {
+    setInitialMicOn(!initialMicOn);
+  };
 
   const handleToggleWebcam = () => {
+    console.log("📹 Toggling webcam...");
     toggleWebcam();
   };
-
-  const handleEndCall = () => {
-    leave();
-    onMeetingLeave();
-  };
-
   return (
     <div className={styles.actionsBtns}>
       {callState === "calling" && (
         <>
           <button
             className={`${styles.actionsBtnsBx} ${styles.video}`}
-            onClick={handleToggleWebcam}
+            // onClick={handleToggleWebcam}
           >
             <div className={styles.image}>
               <img src={Accept_call} alt="Video" />
@@ -43,10 +58,13 @@ const MeetingControls = ({ handleAccept, handleReject, callState }) => {
 
           <button
             className={`${styles.actionsBtnsBx} ${styles.microphone}`}
-            onClick={handleToggleMic}
+            onClick={setUpInitialMicOn}
           >
             <div className={styles.image}>
-              <img src={MicrophoneOn} alt="Video" />
+              <img
+                src={initialMicOn ? MicrophoneOn : MicrophoneOff}
+                alt="Microphone"
+              />
             </div>
             <span>Microphone</span>
           </button>
@@ -104,7 +122,10 @@ const MeetingControls = ({ handleAccept, handleReject, callState }) => {
             onClick={handleToggleMic}
           >
             <div className={styles.image}>
-              <img src={MicrophoneOn} alt="Video" />
+              <img
+                src={localMicOn ? MicrophoneOn : MicrophoneOff}
+                alt="Microphone"
+              />
             </div>
             <span>Microphone</span>
           </button>
