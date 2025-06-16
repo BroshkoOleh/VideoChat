@@ -24,8 +24,8 @@ const MeetingView = forwardRef(
     const {
       join,
       leave,
-      toggleMic,
-      toggleWebcam,
+      // toggleMic,
+      // toggleWebcam,
       participants,
       localMicOn,
       localWebcamOn,
@@ -83,7 +83,7 @@ const MeetingView = forwardRef(
           join();
         }, 100);
       }
-    }, [callState, joined, join, setJoined]);
+    }, [callState, joined, join, setJoined, meetingId]);
 
     // Cleanup тільки при розмонтуванні компонента
     useEffect(() => {
@@ -105,120 +105,28 @@ const MeetingView = forwardRef(
     //   onMeetingLeave();
     // };
 
-    // Контроли мітингу
-    const handleToggleMic = () => {
-      console.log("handleToggleMic");
-      toggleMic();
-    };
+    // // Контроли мітингу
+    // const handleToggleMic = () => {
+    //   console.log("handleToggleMic");
+    //   toggleMic();
+    // };
 
-    const handleToggleWebcam = () => {
-      toggleWebcam();
-    };
+    // const handleToggleWebcam = () => {
+    //   toggleWebcam();
+    // };
 
-    const handleLeave = () => {
-      leave();
-    };
+    // const handleLeave = () => {
+    //   leave();
+    // };
 
     console.log("callState", callState);
 
     if (callState === "receiving") {
-      return (
-        <CallModal
-          userName={userName}
-          isAudioCall={isAudioCall}
-          // onAcceptCall={handleAccept}
-          // onRejectCall={handleReject}
-          // onTogglePreviewVideo={onTogglePreviewVideo}
-        />
-        // <div className={styles.modalViewContainer}>
-        //   <div className={styles.incomingCall}>
-        //     <div className={styles.userAvatar}>
-        //       <div className={styles.avatarCircle}>
-        //         {userName.charAt(0).toUpperCase()}
-        //       </div>
-        //     </div>
-        //     <h3 className={styles.callerName}>{userName}</h3>
-        //     <p className={styles.callType}>
-        //       {isAudioCall ? "📞 Аудіо дзвінок" : "📹 Відео дзвінок"}
-        //     </p>
-        //     <div className={styles.callActions}>
-        //       {/* Кнопка керування камерою прев'ю */}
-        //       {onTogglePreviewVideo && (
-        //         <button
-        //           className={`${styles.actionBtn} ${styles.previewVideo} ${
-        //             isPreviewVideoEnabled ? styles.active : styles.inactive
-        //           }`}
-        //           onClick={onTogglePreviewVideo}
-        //           title={
-        //             isPreviewVideoEnabled ? "Вимкнути відео" : "Увімкнути відео"
-        //           }
-        //         >
-        //           {isPreviewVideoEnabled ? "📹" : "🚫📹"}
-        //         </button>
-        //       )}
-        //       <button
-        //         className={`${styles.actionBtn} ${styles.accept}`}
-        //         onClick={handleAccept}
-        //       >
-        //         ✅ Прийняти
-        //       </button>
-        //       <button
-        //         className={`${styles.actionBtn} ${styles.reject}`}
-        //         onClick={handleReject}
-        //       >
-        //         ❌ Відхилити
-        //       </button>
-        //     </div>
-        //   </div>
-        // </div>
-      );
+      return <CallModal userName={userName} isAudioCall={isAudioCall} />;
     }
 
     if (callState === "calling") {
-      return (
-        <CallModal
-          userName={userName}
-          isAudioCall={isAudioCall}
-          // onAcceptCall={handleAccept}
-          // onRejectCall={handleReject}
-          // onTogglePreviewVideo={onTogglePreviewVideo}
-        />
-        // <div className={styles.modalViewContainer}>
-        //   <div className={styles.outgoingCall}>
-        //     <div className={styles.userAvatar}>
-        //       <div className={styles.avatarCircle}>
-        //         {userName.charAt(0).toUpperCase()}
-        //       </div>
-        //     </div>
-        //     <h3 className={styles.callerName}>{userName}</h3>
-        //     <p className={styles.callStatus}>Дзвонимо...</p>
-        //     <div className={styles.callActions}>
-        //       {/* Кнопка керування камерою прев'ю */}
-        //       {/* {onTogglePreviewVideo && (
-        //         <button
-        //           className={`${styles.actionBtn} ${styles.previewVideo} ${
-        //             isPreviewVideoEnabled ? styles.active : styles.inactive
-        //           }`}
-        //           onClick={onTogglePreviewVideo}
-        //           title={
-        //             isPreviewVideoEnabled ? "Вимкнути відео" : "Увімкнути відео"
-        //           }
-        //         >
-        //           {isPreviewVideoEnabled ? "📹" : "🚫📹"}
-        //         </button>
-        //       )} */}
-        //       <button
-        //         className={`${styles.actionBtn} ${styles.cancel}`}
-        //         onClick={() => {
-        //           onMeetingLeave();
-        //         }}
-        //       >
-        //         📞 Скасувати
-        //       </button>
-        //     </div>
-        //   </div>
-        // </div>
-      );
+      return <CallModal userName={userName} isAudioCall={isAudioCall} />;
     }
 
     // if (callState === "in-call") {
@@ -277,20 +185,18 @@ const MeetingView = forwardRef(
     // }
     if (callState === "in-call") {
       return (
-        <div>
-          <CallModal
-            userName={userName}
-            isAudioCall={isAudioCall}
-            localMicOn={localMicOn}
-            localWebcamOn={localWebcamOn}
-            participants={participants}
-            joined={joined}
-            callState={callState}
-            // onAcceptCall={handleAccept}
-            // onRejectCall={handleReject}
-            // onTogglePreviewVideo={onTogglePreviewVideo}
-          />
-        </div>
+        <CallModal
+          userName={userName}
+          isAudioCall={isAudioCall}
+          localMicOn={localMicOn}
+          localWebcamOn={localWebcamOn}
+          participants={participants}
+          joined={joined}
+          callState={callState}
+          // onAcceptCall={handleAccept}
+          // onRejectCall={handleReject}
+          // onTogglePreviewVideo={onTogglePreviewVideo}
+        />
       );
     }
 

@@ -37,14 +37,12 @@ const GlobalModalContainer = () => {
 
   return (
     <div className={styles.overlay}>
-      <div className={styles.modal}>
-        <MeetingView
-          ref={meetingViewRef}
-          userName={userName}
-          isAudioCall={isAudioCall}
-          callState={callState}
-        />
-      </div>
+      <MeetingView
+        ref={meetingViewRef}
+        userName={userName}
+        isAudioCall={isAudioCall}
+        callState={callState}
+      />
     </div>
   );
 };
